@@ -2,8 +2,6 @@ package demo.com.controller;
 
 import demo.com.domain.Anime;
 import demo.com.util.DateUtil;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.GetMapping;
