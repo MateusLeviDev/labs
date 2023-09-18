@@ -1,45 +1,43 @@
 package demo.com.service;
 
 import demo.com.domain.Anime;
+import demo.com.repository.AnimeRepository;
+import demo.com.requests.AnimePostRequestBody;
+import demo.com.requests.AnimePutRequestBody;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 @Service
+@RequiredArgsConstructor
 public class AnimeService {
-    private final List<Anime> animes;
+    private final AnimeRepository repository;
 
-    {
-        animes = List.of(new Anime(1L, "DBZ"), new Anime(2L, "Berserk"));
+    public List<Anime> listAll() {
+        return repository.findAll();
     }
 
-
-    public List<Anime> findAll() {
-        return animes;
-    }
-
-    public Anime findById(Long id) {
-        return animes.stream()
-                .filter(anime -> anime.getId().equals(id))
-                .findFirst()
+    public Anime findByIdOrThrowBadRequestException(Long id) {
+        return repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Anime not found."));
     }
 
-    public Anime save(Anime anime) {
-        anime.setId(ThreadLocalRandom.current().nextLong(3, 100000));
-        animes.add(anime);
-        return anime;
+    public Anime save(AnimePostRequestBody AnimePostRequestBody) {
+        return repository.save(Anime.builder().name(AnimePostRequestBody.getName()).build());
     }
 
     public void delete(long id) {
-        animes.remove(findById(id));
+        repository.delete(findByIdOrThrowBadRequestException(id));
     }
 
-    public void replace(Anime anime) {
-        delete(anime.getId());
-        animes.add(anime);
+    public void replace(AnimePutRequestBody animePutRequestBody) {
+        Anime savedAnime = findByIdOrThrowBadRequestException(animePutRequestBody.getId());
+        Anime anime = Anime.builder()
+                .id(savedAnime.getId())
+                .name(savedAnime.getName())
+                .build();
     }
 }

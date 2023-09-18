@@ -1,6 +1,8 @@
 package demo.com.controller;
 
 import demo.com.domain.Anime;
+import demo.com.requests.AnimePostRequestBody;
+import demo.com.requests.AnimePutRequestBody;
 import demo.com.service.AnimeService;
 import demo.com.util.DateUtil;
 import lombok.RequiredArgsConstructor;
@@ -24,17 +26,17 @@ public class AnimeController {
     @GetMapping
     public ResponseEntity<List<Anime>> list() {
         log.info(dateUtil.formatLocalDateTimeToDataBaseStyle(LocalDateTime.now()));
-        return ResponseEntity.ok(animeService.findAll());
+        return ResponseEntity.ok(animeService.listAll());
     }
 
     @GetMapping(path = "/{id}")
     public ResponseEntity<Anime> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(animeService.findById(id));
+        return ResponseEntity.ok(animeService.findByIdOrThrowBadRequestException(id));
     }
 
     @PostMapping
-    public ResponseEntity<Anime> save(@RequestBody Anime anime) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(anime);
+    public ResponseEntity<Anime> save(@RequestBody AnimePostRequestBody animePostRequestBody) {
+        return new ResponseEntity<>(animeService.save(animePostRequestBody), HttpStatus.CREATED);
     }
 
     @DeleteMapping(path = "/{id}")
@@ -44,8 +46,8 @@ public class AnimeController {
     }
 
     @PutMapping
-    public ResponseEntity<Void> replace(@RequestBody Anime anime) {
-        animeService.replace(anime);
+    public ResponseEntity<Void> replace(@RequestBody AnimePutRequestBody animePutRequestBody) {
+        animeService.replace(animePutRequestBody);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
