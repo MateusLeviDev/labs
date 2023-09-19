@@ -1,6 +1,7 @@
 package demo.com.service;
 
 import demo.com.domain.Anime;
+import demo.com.mapper.AnimeMapper;
 import demo.com.repository.AnimeRepository;
 import demo.com.requests.AnimePostRequestBody;
 import demo.com.requests.AnimePutRequestBody;
@@ -26,7 +27,8 @@ public class AnimeService {
     }
 
     public Anime save(AnimePostRequestBody AnimePostRequestBody) {
-        return repository.save(Anime.builder().name(AnimePostRequestBody.getName()).build());
+        return repository.save(
+                AnimeMapper.INSTANCE.toMapper(AnimePostRequestBody));
     }
 
     public void delete(long id) {
@@ -35,9 +37,8 @@ public class AnimeService {
 
     public void replace(AnimePutRequestBody animePutRequestBody) {
         Anime savedAnime = findByIdOrThrowBadRequestException(animePutRequestBody.getId());
-        Anime anime = Anime.builder()
-                .id(savedAnime.getId())
-                .name(savedAnime.getName())
-                .build();
+        Anime anime = AnimeMapper.INSTANCE.toMapper(animePutRequestBody);
+        anime.setId(savedAnime.getId());
+        repository.save(anime);
     }
 }
