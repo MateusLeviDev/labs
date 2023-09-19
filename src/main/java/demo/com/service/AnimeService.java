@@ -1,14 +1,13 @@
 package demo.com.service;
 
 import demo.com.domain.Anime;
+import demo.com.exception.BadRequestException;
 import demo.com.mapper.AnimeMapper;
 import demo.com.repository.AnimeRepository;
 import demo.com.requests.AnimePostRequestBody;
 import demo.com.requests.AnimePutRequestBody;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -23,7 +22,7 @@ public class AnimeService {
 
     public Anime findByIdOrThrowBadRequestException(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Anime not found."));
+                .orElseThrow(() -> new BadRequestException("Anime not found."));
     }
 
     public Anime save(AnimePostRequestBody AnimePostRequestBody) {
