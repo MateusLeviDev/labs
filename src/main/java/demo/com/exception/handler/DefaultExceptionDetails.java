@@ -1,4 +1,4 @@
-package demo.com.exception;
+package demo.com.exception.handler;
 
 import lombok.Builder;
 import lombok.Data;
@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-public class BadRequestExceptionDetails {
+public class DefaultExceptionDetails {
     private String title;
     private int status;
     private String details;
