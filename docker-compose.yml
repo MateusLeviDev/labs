@@ -1,5 +1,51 @@
 version: '3.1'
 services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
+    container_name: elasticsearch_springboot
+    environment:
+        - bootstrap.memory_lock=true
+        - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+        - "discovery.type=single-node"
+        - xpack.security.enabled=false
+    ports:
+        - "9200:9200"
+    volumes:
+        - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+        - elastic
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.3.3
+    container_name: kibana_springboot
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+    depends_on:
+      - elasticsearch
+    networks:
+      - elastic
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.3.3
+    container_name: logstash_springboot
+    volumes:
+      - ./src/main/java/demo/com/configurer/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./src/main/java/demo/com/pipeline/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+    ports:
+      - "5044:5044"
+      - "5000:5000/tcp"
+      - "5000:5000/udp"
+      - "9600:9600"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - elastic
+    depends_on:
+      - elasticsearch
+
   db:
     image: mysql
     container_name: mysql-spring2
@@ -9,6 +55,11 @@ services:
       - "3306:3306"
     volumes:
       - levi_data:/var/lib/mysql
+networks:
+  elastic:
+    driver: bridge
 
 volumes:
+  elasticsearch_data:
+    driver: local
   levi_data:
