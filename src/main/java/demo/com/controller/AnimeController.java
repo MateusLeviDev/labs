@@ -5,7 +5,6 @@ import demo.com.requests.AnimePostRequestBody;
 import demo.com.requests.AnimePutRequestBody;
 import demo.com.service.AnimeService;
 import demo.com.util.DateUtil;
-import demo.com.util.RequestUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -14,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -28,21 +28,27 @@ public class AnimeController {
     private final DateUtil dateUtil;
     private final AnimeService animeService;
 
+    @GetMapping("/logs")
+    public String homePage() {
+        LocalDateTime localDateTime = LocalDateTime.now();
+        log.info("This logs page" + localDateTime);
+        return "Welcome SpringBoot";
+    }
+
     @GetMapping
     public ResponseEntity<Page<Anime>> list(Pageable pageable) {
-        log.info(dateUtil.formatLocalDateTimeToDataBaseStyle(LocalDateTime.now()));
         return ResponseEntity.ok(animeService.listAll(pageable));
     }
 
     @GetMapping(path = "/all")
     public ResponseEntity<List<Anime>> listAll() {
-        log.info(dateUtil.formatLocalDateTimeToDataBaseStyle(LocalDateTime.now()));
+        log.info("List all animes" + dateUtil.formatLocalDateTimeToDataBaseStyle(LocalDateTime.now()));
         return ResponseEntity.ok(animeService.listAllNonPageable());
     }
 
     @GetMapping("/ip")
-    public ResponseEntity<?> getIP() throws IOException {
-        return ResponseEntity.ok().body(RequestUtil.getIP());
+    public ResponseEntity<?> getIP(HttpServletRequest request) throws IOException {
+        return ResponseEntity.ok().body(request.getRemoteAddr());
     }
 
     @GetMapping(path = "/{id}")
