@@ -25,7 +25,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AnimeController {
 
-    private final DateUtil dateUtil;
     private final AnimeService animeService;
 
     @GetMapping("/logs")
@@ -42,7 +41,8 @@ public class AnimeController {
 
     @GetMapping(path = "/all")
     public ResponseEntity<List<Anime>> listAll() {
-        log.info("List all animes" + dateUtil.formatLocalDateTimeToDataBaseStyle(LocalDateTime.now()));
+        LocalDateTime localDateTime = LocalDateTime.now();
+        log.info("List all animes" + localDateTime);
         return ResponseEntity.ok(animeService.listAllNonPageable());
     }
 
