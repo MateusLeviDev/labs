@@ -25,19 +25,19 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.Collections;
 import java.util.List;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(SpringExtension.class) //queremos iniciar o junit com spring
 class AnimeControllerTest {
 
-    @InjectMocks
+    @InjectMocks //quando voce quer estar a classe em si
     private AnimeController animeController;
-    @Mock
+    @Mock //todas as classes dentro da classe principal a ser testada (AnimeController)
     private AnimeService animeServiceMock;
 
     @BeforeEach
-    void setUp() {
+    void setUp() { //executar antes de cada um
         PageImpl<Anime> animePage = new PageImpl<>(List.of(AnimeCreator.createValidAnime()));
         BDDMockito.when(animeServiceMock.listAll(ArgumentMatchers.any()))
-                .thenReturn(animePage);
+                .thenReturn(animePage); //n importando o arg arg.any pode ser null, etc
 
         BDDMockito.when(animeServiceMock.listAllNonPageable())
                 .thenReturn(List.of(AnimeCreator.createValidAnime()));
@@ -61,7 +61,7 @@ class AnimeControllerTest {
     void list_ReturnsListOfAnimesInsidePageObject_WhenSuccessful() {
         String expectedName = AnimeCreator.createValidAnime().getName();
 
-        Page<Anime> animePage = animeController.list(null).getBody();
+        Page<Anime> animePage = animeController.list(null).getBody(); //retorna um responseentity ent pegamos body
 
         Assertions.assertThat(animePage).isNotNull();
 
