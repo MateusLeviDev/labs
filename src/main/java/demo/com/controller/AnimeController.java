@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping()
+@RequestMapping("/animes")
 @Log4j2
 @RequiredArgsConstructor
 public class AnimeController {
