@@ -2,7 +2,8 @@ package demo.com.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +17,19 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
+    /**
+     * 1 filtro BasicAuthenticationFilter basic64
+     * UsernamePasswordAuthenticationFilter
+     * DefaultLoginGeneratingFilter
+     * DefaultLogoutGeneratingFilter
+     * FilterSecurityInterceptor
+     * Authentication -> Authorization
+     *
+     * @param http
+     * @param userDetailsManager
+     * @return
+     * @throws Exception
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, InMemoryUserDetailsManager userDetailsManager) throws Exception {
         http.csrf(Customizer.withDefaults())
