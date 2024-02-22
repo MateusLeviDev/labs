@@ -1,7 +1,7 @@
 package demo.com.wrapper;
 
+
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
@@ -19,7 +19,7 @@ public class PageableResponse<T> extends PageImpl<T> {
     private int totalPages;
     private int numberOfElements;
 
-    @JsonCreator(mode = Mode.PROPERTIES )
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES )
     public PageableResponse(@JsonProperty("content") List<T> content,
                             @JsonProperty("number") int number,
                             @JsonProperty("size") int size,
