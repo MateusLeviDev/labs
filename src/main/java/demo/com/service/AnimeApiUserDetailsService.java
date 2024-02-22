@@ -1,5 +1,6 @@
 package demo.com.service;
 
+
 import demo.com.repository.AnimeApiUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,6 +13,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class AnimeApiUserDetailsService implements UserDetailsService {
+
     private final AnimeApiUserRepository animeApiUserRepository;
 
     @Override

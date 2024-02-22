@@ -1,5 +1,6 @@
 package demo.com.client;
 
+
 import demo.com.domain.Anime;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;

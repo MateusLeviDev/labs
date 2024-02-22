@@ -1,11 +1,17 @@
 package demo.com.exception.handler;
 
-import demo.com.exception.*;
+
+import demo.com.exception.BadRequestException;
+import demo.com.exception.BadRequestExceptionDetails;
+import demo.com.exception.ExceptionDetails;
+import demo.com.exception.ValidationExceptionDetails;
+import jakarta.validation.constraints.NotNull;
+import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -34,10 +40,10 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException exception, HttpHeaders headers, HttpStatus status, WebRequest request) {
-
-        List<FieldError> fieldErrors = exception.getBindingResult().getFieldErrors();
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+                                                                  @NonNull HttpHeaders headers,
+                                                                  @NonNull HttpStatusCode status, WebRequest request) {
+        List<FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();
 
         String fields = fieldErrors.stream()
                 .map(FieldError::getField)
@@ -53,24 +59,25 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
                         .status(HttpStatus.BAD_REQUEST.value())
                         .title("Bad Request Exception, Invalid Fields")
                         .details("Check the field(s) error")
-                        .developerMessage(exception.getClass().getName())
+                        .developerMessage(ex.getClass().getName())
                         .fields(fields)
                         .fieldsMessage(fieldsMessage)
                         .build(), HttpStatus.BAD_REQUEST);
     }
 
     @Override
-    protected ResponseEntity<Object> handleExceptionInternal(
-            Exception ex, @Nullable Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
-
+    protected ResponseEntity<Object> handleExceptionInternal(Exception ex,
+                                                             Object body,
+                                                             @NonNull HttpHeaders headers, HttpStatusCode statusCode,
+                                                             @NonNull WebRequest request) {
         ExceptionDetails exceptionDetails = ExceptionDetails.builder()
                 .timestamp(LocalDateTime.now())
-                .status(status.value())
+                .status(statusCode.value())
                 .title(ex.getCause().getMessage())
                 .details(ex.getMessage())
                 .developerMessage(ex.getClass().getName())
                 .build();
 
-        return new ResponseEntity<>(exceptionDetails, headers, status);
+        return new ResponseEntity<>(exceptionDetails, headers, statusCode);
     }
 }
