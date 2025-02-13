@@ -1,4 +1,4 @@
-package br.com.icecube.customer.utils;
+package br.com.icecube.customer.domain.service.impl;
 
 import br.com.icecube.customer.api.dto.AddressDTO;
 import br.com.icecube.customer.api.dto.CustomerDTO;
