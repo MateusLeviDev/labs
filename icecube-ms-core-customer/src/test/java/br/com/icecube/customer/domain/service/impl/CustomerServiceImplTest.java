@@ -6,7 +6,7 @@ import br.com.icecube.customer.api.mapper.AddressMapper;
 import br.com.icecube.customer.api.mapper.CustomerMapper;
 import br.com.icecube.customer.domain.model.Customer;
 import br.com.icecube.customer.domain.repository.CustomerRepository;
-import br.com.icecube.customer.utils.TestDataFactory;
+import br.com.icecube.customer.messaging.event.CustomerEvent;
 import jakarta.persistence.EntityNotFoundException;
 import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,11 +16,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Sinks;
 
 import java.util.Optional;
 
+import static br.com.icecube.customer.common.constants.TestConstants.*;
 import static br.com.icecube.customer.domain.service.impl.CustomerServiceImpl.ADDRESS_NOT_FOUND;
-import static br.com.icecube.customer.utils.constants.TestConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -35,6 +36,8 @@ class CustomerServiceImplTest {
     private AddressMapper addressMapper;
     @InjectMocks
     private CustomerServiceImpl customerService;
+    @Mock
+    private Sinks.Many<CustomerEvent> customerProducer;
 
     CustomerDTO customerDTO;
     Customer customerToBeSaved;
@@ -65,6 +68,7 @@ class CustomerServiceImplTest {
         assertEquals(CUSTOMER_DOCUMENT, capture.getDocument().getValue());
         verify(customerRepository).existsByDocument_Value(CUSTOMER_DOCUMENT);
         verify(customerMapper).toModel(customerDTO);
+        verify(customerProducer).tryEmitNext(any(CustomerEvent.CustomerCreated.class));
     }
 
     @Test
