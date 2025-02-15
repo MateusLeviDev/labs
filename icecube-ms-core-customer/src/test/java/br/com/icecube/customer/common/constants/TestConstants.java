@@ -9,5 +9,6 @@ public class TestConstants {
     public static final String BASE_URI = "http://localhost:%s";
     public static final String KAFKA_IMAGE = "confluentinc/cp-kafka:7.4.0";
     public static final String POSTGRES_IMAGE = "postgres:16-alpine";
+    public static final String CUSTOMER_URI = "/v1/customers";
 
 }
