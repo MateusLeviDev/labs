@@ -2,11 +2,15 @@ package br.com.icecube.customer.api.controller;
 
 import br.com.icecube.customer.common.AbstractContainerProvider;
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import static br.com.icecube.customer.common.constants.TestConstants.CUSTOMER_URI;
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
 
 
 @Testcontainers
@@ -15,10 +19,10 @@ class CustomerControllerTest extends AbstractContainerProvider {
 
     @Test
     void shouldCreateCustomerSuccessfully() {
-        String requestBody = """
+        var requestBody = """
                     {
                          "legalName": "John Doe Enterprises",
-                         "document": "43082242847",
+                         "document": "42082042040",
                          "address": [
                              {
                                  "street": "123 Main St",
@@ -36,12 +40,21 @@ class CustomerControllerTest extends AbstractContainerProvider {
                      }
                 """;
 
-        given()
+        Response response = given()
                 .contentType(ContentType.JSON)
                 .body(requestBody)
                 .when()
-                .post("/v1/customers")
+                .post(CUSTOMER_URI)
                 .then()
-                .statusCode(201);
+                .statusCode(201)
+                .body("legalName.value", equalTo("John Doe Enterprises"))
+                .body("document.value", equalTo("42082042040"))
+                .body("address[1].zipcode", equalTo("67890"))
+                .extract()
+                .response();
+
+        var savedCustomerId = response.jsonPath().getString("id");
+        Assertions.assertNotNull(savedCustomerId);
+
     }
 }

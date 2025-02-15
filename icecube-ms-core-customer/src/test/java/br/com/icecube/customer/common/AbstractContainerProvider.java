@@ -13,7 +13,7 @@ import org.testcontainers.utility.DockerImageName;
 
 import static br.com.icecube.customer.common.constants.TestConstants.*;
 
-public class AbstractContainerProvider {
+public abstract class AbstractContainerProvider {
 
     static ConfluentKafkaContainer kafka = new ConfluentKafkaContainer(KAFKA_IMAGE);
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse(POSTGRES_IMAGE));
