@@ -10,7 +10,16 @@ spring.datasource:
   username: postgres
   password: postgres
 
-spring.cloud:
-  function.definition: customerEventSink
-  stream.bindings:
-    customerEventSink-out-0.destination: customer-created-topic
+spring:
+  cloud:
+    function:
+      definition: customerEventSink
+    stream:
+      bindings:
+        customerEventSink-out-0:
+          destination: customer-created-topic
+      kafka:
+        binder:
+          configuration:
+            enable.idempotence: true
+            acks: all
