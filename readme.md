@@ -81,3 +81,16 @@ spring.cloud.stream.bindings:
 ```
 
 - `in`: epresenta um ponto em que a aplicação recebe mensagens.
+
+
+#### Idempotent Producer
+
+Pattern to imporve ms message delivery.
+
+Transient Failures: are temporary issues that can resolve on their own without manual intervation. For producer this includes network glitches, broker unavailability, timeout errors etc
+
+How do we solve duplication issue? (even if retries occur due to network issues or other failures)
+precisamos habilitar o idempotent. dessa forma, o kafka assigns a producre ID (PID) and sequence numbers to messages
+PID + SEQ
+
+- kafka broker assigns PID when the producer first contact. ou seja, mesmo se enviar o ack e falhar, será gravado. dessa forma permite saber as duplicatas
