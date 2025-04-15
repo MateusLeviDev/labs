@@ -94,3 +94,6 @@ precisamos habilitar o idempotent. dessa forma, o kafka assigns a producre ID (P
 PID + SEQ
 
 - kafka broker assigns PID when the producer first contact. ou seja, mesmo se enviar o ack e falhar, será gravado. dessa forma permite saber as duplicatas
+
+use case 1 Duplicated message solved w/ idempotent producer
+- ![Screenshot from 2025-04-15 16-38-38](https://github.com/user-attachments/assets/255f6941-13f6-45f6-9ca5-6f4b4c164a8f)
