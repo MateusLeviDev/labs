@@ -97,3 +97,11 @@ PID + SEQ
 
 use case 1 Duplicated message solved w/ idempotent producer
 - ![Screenshot from 2025-04-15 16-38-38](https://github.com/user-attachments/assets/255f6941-13f6-45f6-9ca5-6f4b4c164a8f)
+
+#### Configurações do Produtor
+
+- MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION : Se estivermos enviando várias mensagens, esta configuração no Kafka ajuda a decidir quantas mensagens podemos enviar sem esperar por uma confirmação de "leitura". Se definirmos um valor maior que 1 sem ativar a idempotência, podemos acabar alterando a ordem das nossas mensagens se precisarmos reenviá-las. Mas, se ativarmos a idempotência, o Kafka mantém as mensagens em ordem, mesmo se enviarmos várias de uma vez. Para uma ordem super estrita, como garantir que cada mensagem seja lida antes do envio da próxima, devemos definir este valor como 1. Se quisermos priorizar a velocidade em vez da ordem perfeita, podemos definir até 5, mas isso pode potencialmente introduzir problemas de ordenação.
+
+
+- BATCH_SIZE_CONFIG e LINGER_MS_CONFIG : O Kafka controla o tamanho padrão do lote em bytes, visando agrupar registros para a mesma partição em menos solicitações para melhor desempenho. Se definirmos esse limite muito baixo, enviaremos muitos grupos pequenos, o que pode nos atrasar. Mas se o definirmos muito alto, pode não ser o melhor uso da nossa memória. O Kafka pode esperar um pouco antes de enviar um grupo se ele ainda não estiver cheio. Esse tempo de espera é controlado por LINGER_MS_CONFIG. Se mais mensagens chegarem com rapidez suficiente para preencher nosso limite definido, elas serão enviadas imediatamente, mas se não, o Kafka não fica esperando – ele envia o que tivermos quando o tempo acabar. É como equilibrar velocidade e eficiência, garantindo que estamos enviando apenas mensagens suficientes por vez, sem atrasos desnecessários.
+
