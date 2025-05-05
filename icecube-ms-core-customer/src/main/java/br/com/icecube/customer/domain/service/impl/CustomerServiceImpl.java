@@ -2,6 +2,7 @@ package br.com.icecube.customer.domain.service.impl;
 
 import br.com.icecube.customer.api.dto.AddressDTO;
 import br.com.icecube.customer.api.dto.CustomerDTO;
+import br.com.icecube.customer.api.dto.CustomerKafkaDTO;
 import br.com.icecube.customer.api.mapper.AddressMapper;
 import br.com.icecube.customer.api.mapper.CustomerMapper;
 import br.com.icecube.customer.domain.model.Customer;
@@ -47,7 +48,14 @@ public class CustomerServiceImpl implements CustomerService {
         Customer savedCustomer = customerRepository.save(customer);
         log.info("Customer saved successfully document = {}", savedCustomer.getDocument().getValue());
 
-        var customerCreatedEvent = new CustomerEvent.CustomerCreated(savedCustomer.getId(), Instant.now());
+        CustomerKafkaDTO customerToKafka = new CustomerKafkaDTO(
+                "John Doe",
+                "2000-01-01",
+                "johndoe@mail.com",
+                10
+        );
+        var customerCreatedEvent = new CustomerEvent.CustomerCreated(
+                savedCustomer.getId(), Instant.now(), customerToKafka);
         customerProducer.tryEmitNext(customerCreatedEvent);
 
         return savedCustomer;
