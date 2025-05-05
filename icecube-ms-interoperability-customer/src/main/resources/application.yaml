@@ -13,7 +13,33 @@ spring.datasource:
     password: postgres
 
 spring.cloud:
-    function.definition: processCustomerCreated
-    stream.bindings:
-        processCustomerCreated-in-0.destination: customer-created-topic
-        processCustomerCreated-out-0.destination: decision-topic
+    function.definition: processCustomerCreated;processCustomerCreatedFromRetryTopic
+    stream:
+        bindings:
+            processCustomerCreated-in-0:
+                destination: customer-created-topic
+                group: decision-microservice
+                consumer:
+                    max-attempts: 0
+                    concurrency: 3
+            processCustomerCreatedFromRetryTopic-in-0:
+                destination: decision.customer-retry-topic
+                group: decision-microservice
+                consumer:
+                    concurrency: 3
+                    max-attempts: 3
+                    retryable-exceptions:
+                        br.com.icecube.exception.TransientFailureException: true
+                    back-off-initial-interval: 1000
+                    back-off-max-interval: 10000
+                    back-off-multiplier: 2.0
+            kafka:
+                bindings:
+                    processCustomerCreated-in-0:
+                        consumer:
+                            enable-dlq: true
+                            dlq-name: decision.customer-retry-topic
+                    processCustomerCreatedFromRetryTopic-in-0:
+                        consumer:
+                            enable-dlq: true
+                            dlq-name: decision.customer-DLQ

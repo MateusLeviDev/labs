@@ -31,13 +31,13 @@ public class Decision {
         this.ssn = ssn;
     }
 
-    public static Decision decide(SSN ssn, LocalDate birthdate) {
+    public static Decision decide(SSN ssn, String birthdate) {
         Period creditLimitDuration = Period.ofYears(40);
         var maximumCustomerYears = 70;
 
         LocalDate maximumAllowedAge = LocalDate.now().plus(creditLimitDuration);
 
-        long customerYearsInTheEndOfCredit = ChronoUnit.YEARS.between(birthdate, maximumAllowedAge);
+        long customerYearsInTheEndOfCredit = ChronoUnit.YEARS.between(LocalDate.parse(birthdate), maximumAllowedAge);
 
         if (customerYearsInTheEndOfCredit > maximumCustomerYears) {
             return new Decision(State.REJECTED, ssn);
