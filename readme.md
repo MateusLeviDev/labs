@@ -105,3 +105,49 @@ use case 1 Duplicated message solved w/ idempotent producer
 
 - BATCH_SIZE_CONFIG e LINGER_MS_CONFIG : O Kafka controla o tamanho padrão do lote em bytes, visando agrupar registros para a mesma partição em menos solicitações para melhor desempenho. Se definirmos esse limite muito baixo, enviaremos muitos grupos pequenos, o que pode nos atrasar. Mas se o definirmos muito alto, pode não ser o melhor uso da nossa memória. O Kafka pode esperar um pouco antes de enviar um grupo se ele ainda não estiver cheio. Esse tempo de espera é controlado por LINGER_MS_CONFIG. Se mais mensagens chegarem com rapidez suficiente para preencher nosso limite definido, elas serão enviadas imediatamente, mas se não, o Kafka não fica esperando – ele envia o que tivermos quando o tempo acabar. É como equilibrar velocidade e eficiência, garantindo que estamos enviando apenas mensagens suficientes por vez, sem atrasos desnecessários.
 
+
+---
+
+
+```exemplo .properties
+
+server.port=8082
+
+spring.jpa.show-sql=true
+spring.jpa.hibernate.ddl-auto=create
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+
+spring.datasource.url=jdbc:postgresql://localhost:5433/decision_db
+spring.datasource.username=postgres
+spring.datasource.password=postgres
+
+spring.cloud.function.definition=processCustomerCreated;processCustomerCreatedFromRetryTopic
+
+#----- configurations for original topic
+spring.cloud.stream.bindings.processCustomerCreated-in-0.destination=customer-created-topic
+spring.cloud.stream.bindings.processCustomerCreated-in-0.group=decision-microservice
+spring.cloud.stream.bindings.processCustomerCreated-in-0.consumer.max-attempts=0
+spring.cloud.stream.bindings.processCustomerCreated-in-0.consumer.concurrency=3
+spring.cloud.stream.kafka.bindings.processCustomerCreated-in-0.consumer.enable-dlq=true
+spring.cloud.stream.kafka.bindings.processCustomerCreated-in-0.consumer.dlq-name=decision.customer-retry-topic
+
+#----- configurations for retry topic
+spring.cloud.stream.bindings.processCustomerCreatedFromRetryTopic-in-0.destination=decision.customer-retry-topic
+spring.cloud.stream.bindings.processCustomerCreatedFromRetryTopic-in-0.consumer.concurrency=3
+spring.cloud.stream.bindings.processCustomerCreatedFromRetryTopic-in-0.consumer.max-attempts=3
+spring.cloud.stream.bindings.processCustomerCreatedFromRetryTopic-in-0.consumer.retryable-exceptions.br.com.icecube.exception.TransientFailureException=true
+spring.cloud.stream.bindings.processCustomerCreatedFromRetryTopic-in-0.consumer.back-off-initial-interval=1000
+spring.cloud.stream.bindings.processCustomerCreatedFromRetryTopic-in-0.consumer.back-off-max-interval=10000
+spring.cloud.stream.bindings.processCustomerCreatedFromRetryTopic-in-0.consumer.back-off-multiplier=2.0
+
+
+spring.cloud.stream.kafka.bindings.processCustomerCreatedFromRetryTopic-in-0.consumer.enable-dlq=true
+spring.cloud.stream.kafka.bindings.processCustomerCreatedFromRetryTopic-in-0.consumer.dlq-name=decision.customer-DLQ
+spring.cloud.stream.bindings.processCustomerCreatedFromRetryTopic-in-0.group=decision-microservice
+
+
+
+```
+
+- ![Screenshot from 2025-04-15 16-38-38](https://github.com/user-attachments/assets/b0d58151-4d6d-4614-b7ec-29c05d9c163d)
