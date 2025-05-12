@@ -1,6 +1,6 @@
 spring.devtools.restart.enabled: false
 
-server.port: 8081
+server.port: 8082
 
 spring.jpa.show-sql: true
 spring.jpa.hibernate.ddl-auto: create
@@ -33,13 +33,13 @@ spring.cloud:
                     back-off-initial-interval: 1000
                     back-off-max-interval: 10000
                     back-off-multiplier: 2.0
-            kafka:
-                bindings:
-                    processCustomerCreated-in-0:
-                        consumer:
-                            enable-dlq: true
-                            dlq-name: decision.customer-retry-topic
-                    processCustomerCreatedFromRetryTopic-in-0:
-                        consumer:
-                            enable-dlq: true
-                            dlq-name: decision.customer-DLQ
+        kafka:
+            bindings:
+                processCustomerCreated-in-0:
+                    consumer:
+                        enable-dlq: true
+                        dlq-name: decision.customer-retry-topic
+                processCustomerCreatedFromRetryTopic-in-0:
+                    consumer:
+                        enable-dlq: true
+                        dlq-name: decision.customer-DLQ
