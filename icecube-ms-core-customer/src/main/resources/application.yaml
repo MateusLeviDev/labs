@@ -1,5 +1,4 @@
 spring.application.name: icecube-ms-core-customer
-
 spring.jpa.show-sql: true
 spring.jpa.hibernate.ddl-auto: create
 spring.jpa.properties.hibernate.format_sql: true
@@ -13,10 +12,10 @@ spring.datasource:
 spring:
   cloud:
     function:
-      definition: customerEventSink
+      definition: customerSupplier
     stream:
       bindings:
-        customerEventSink-out-0:
+        customerSupplier-out-0:
           destination: customer-created-topic
       kafka:
         binder:

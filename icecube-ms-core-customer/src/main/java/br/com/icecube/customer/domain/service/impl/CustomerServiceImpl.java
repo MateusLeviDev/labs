@@ -1,88 +1,80 @@
 package br.com.icecube.customer.domain.service.impl;
 
-import br.com.icecube.customer.api.dto.AddressDTO;
-import br.com.icecube.customer.api.dto.CustomerDTO;
-import br.com.icecube.customer.api.dto.CustomerKafkaDTO;
-import br.com.icecube.customer.api.mapper.AddressMapper;
-import br.com.icecube.customer.api.mapper.CustomerMapper;
 import br.com.icecube.customer.domain.model.Customer;
+import br.com.icecube.customer.domain.model.EmailAddress;
 import br.com.icecube.customer.domain.repository.CustomerRepository;
 import br.com.icecube.customer.domain.service.CustomerService;
 import br.com.icecube.customer.messaging.event.CustomerEvent;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.BadRequestException;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Sinks;
 
 import java.time.Instant;
 
+import static br.com.icecube.customer.api.contants.Constants.Kafka.*;
+import static br.com.icecube.customer.api.mapper.CustomerMapper.mapToCustomerDTO;
+
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
 
-    public static final String DUPLICATED_DOCUMENT = "Customer's document %s already registered";
-    public static final String CUSTOMER_NOT_FOUND = "Customer ID %s not found";
-    public static final String ADDRESS_NOT_FOUND = "Address ID %s not found.";
     private final CustomerRepository customerRepository;
-    private final CustomerMapper customerMapper;
-    private final AddressMapper addressMapper;
-    private final Sinks.Many<CustomerEvent> customerProducer;
+    private final Sinks.Many<Message<?>> customerProducer;
 
-    public CustomerServiceImpl(
-            CustomerRepository customerRepository, CustomerMapper customerMapper, AddressMapper addressMapper,
-            Sinks.Many<CustomerEvent> customerProducer) {
-        this.customerRepository = customerRepository;
-        this.customerMapper = customerMapper;
-        this.addressMapper = addressMapper;
-        this.customerProducer = customerProducer;
+    private static CustomerEvent.CustomerCreated mapToCreateCustomerEvent(Customer customerCreated) {
+        return new CustomerEvent.CustomerCreated(
+                customerCreated.getId(), Instant.now(), mapToCustomerDTO(customerCreated));
+    }
+
+    private static CustomerEvent.EmailUpdated mapToEmailChangedEvent(Customer customer) {
+        return new CustomerEvent.EmailUpdated(
+                customer.getId(), Instant.now(), mapToCustomerDTO(customer));
     }
 
     @Override
     @Transactional
-    public Customer save(CustomerDTO customerDTO) throws BadRequestException {
-        checkDuplicateDocument(customerDTO.document());
-        final var customer = customerMapper.toModel(customerDTO);
-        customer.getAddress().forEach(address -> address.setCustomer(customer));
-        Customer savedCustomer = customerRepository.save(customer);
+    public Customer save(Customer customer) {
+        final Customer savedCustomer = customerRepository.save(customer);
+
+        CustomerEvent.CustomerCreated customerCreatedEvent = mapToCreateCustomerEvent(savedCustomer);
+        final var customerCreatedMessage = MessageBuilder.withPayload(customerCreatedEvent)
+                .setHeader(HEADER_NAME, CUSTOMER_CREATED)
+                .setHeader(KafkaHeaders.KEY, String.valueOf(customerCreatedEvent.customerId()).getBytes())
+                .build();
+
+        customerProducer.tryEmitNext(customerCreatedMessage);
+
         log.info("Customer saved successfully document = {}", savedCustomer.getDocument().getValue());
-
-        CustomerKafkaDTO customerToKafka = new CustomerKafkaDTO(
-                "John Doe",
-                "2000-01-01",
-                "johndoe@mail.com",
-                10
-        );
-        var customerCreatedEvent = new CustomerEvent.CustomerCreated(
-                savedCustomer.getId(), Instant.now(), customerToKafka);
-        customerProducer.tryEmitNext(customerCreatedEvent);
-
         return savedCustomer;
     }
 
-    @Transactional
-    public Customer updateCustomerAddress(Long customerId, Long addressId, AddressDTO updatedAddressDTO) {
-        final var customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new EntityNotFoundException(CUSTOMER_NOT_FOUND.formatted(customerId)));
-        validateIfAddressExist(addressId, customer);
-        customer.updateAddress(addressId, addressMapper.toModel(updatedAddressDTO));
+    @Override
+    public void updateEmail(Long customerId, EmailAddress emailAddress) {
+        final var customer = customerRepository.getReferenceById(customerId);
+        customer.changeEmail(emailAddress);
+        customerRepository.save(customer);
 
-        return customerRepository.save(customer);
+        CustomerEvent.EmailUpdated emailUpdatedMessage = mapToEmailChangedEvent(customer);
+        final var customerCreatedMessage = MessageBuilder.withPayload(emailUpdatedMessage)
+                .setHeader(HEADER_NAME, EMAIL_UPDATED)
+                .setHeader(KafkaHeaders.KEY, String.valueOf(emailUpdatedMessage.customerId()).getBytes())
+                .build();
+        customerProducer.tryEmitNext(customerCreatedMessage);
+
+        log.info("Customer Id {} email updated successfully", customer.getId());
+
     }
 
-    private void validateIfAddressExist(Long addressId, Customer customer) {
-        boolean addressExists = customer.getAddress().stream().anyMatch(address -> address.getId().equals(addressId));
-
-        if (!addressExists) {
-            throw new EntityNotFoundException(ADDRESS_NOT_FOUND.formatted(addressId));
-        }
-    }
-
-    private void checkDuplicateDocument(String document) throws BadRequestException {
-        if (customerRepository.existsByDocument_Value(document)) {
-            throw new BadRequestException(DUPLICATED_DOCUMENT.formatted(document));
-        }
+    private Customer findById(final Long customerId) {
+        return customerRepository.findById(customerId)
+                .orElseThrow(() -> new EntityNotFoundException("Unable to find active customer"));
     }
 
 }

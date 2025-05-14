@@ -1,12 +1,11 @@
 package br.com.icecube.customer.domain.service;
 
-import br.com.icecube.customer.api.dto.AddressDTO;
-import br.com.icecube.customer.api.dto.CustomerDTO;
 import br.com.icecube.customer.domain.model.Customer;
-import org.apache.coyote.BadRequestException;
+import br.com.icecube.customer.domain.model.EmailAddress;
 
 public interface CustomerService {
 
-    Customer save(CustomerDTO customerDTO) throws BadRequestException;
-    Customer updateCustomerAddress(Long customerId, Long addressId, AddressDTO updatedAddressDTO);
+    Customer save(Customer customer);
+
+    void updateEmail(Long customerId, EmailAddress emailAddress);
 }

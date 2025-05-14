@@ -1,10 +1,11 @@
 package br.com.icecube.customer.api.controller;
 
-import br.com.icecube.customer.api.dto.AddressDTO;
 import br.com.icecube.customer.api.dto.CustomerDTO;
+import br.com.icecube.customer.api.dto.EmailDTO;
+import br.com.icecube.customer.api.mapper.CustomerMapper;
 import br.com.icecube.customer.domain.model.Customer;
+import br.com.icecube.customer.domain.model.EmailAddress;
 import br.com.icecube.customer.domain.service.CustomerService;
-import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,16 +21,16 @@ public class CustomerController {
     }
 
     @PostMapping
-    public ResponseEntity<Customer> create(@RequestBody CustomerDTO customerDTO) throws BadRequestException {
-        return new ResponseEntity<>(customerService.save(customerDTO), HttpStatus.CREATED);
+    public ResponseEntity<Customer> create(@RequestBody CustomerDTO customerDTO) {
+        return new ResponseEntity<>(customerService.save(CustomerMapper.mapToCustomer(customerDTO)), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{customerId}/addresses/{addressId}")
-    public ResponseEntity<Customer> updateCustomerAddress(
-            @PathVariable Long customerId,
-            @PathVariable Long addressId,
-            @RequestBody AddressDTO updatedAddressDTO) {
-        Customer updatedCustomer = customerService.updateCustomerAddress(customerId, addressId, updatedAddressDTO);
-        return ResponseEntity.ok(updatedCustomer);
+    @PutMapping("/{customerId}")
+    public ResponseEntity<Void> updateEmail(
+            @PathVariable final Long customerId,
+            @RequestBody EmailDTO emailDTO) {
+
+        customerService.updateEmail(customerId, EmailAddress.of(emailDTO.emailAddress()));
+        return ResponseEntity.noContent().build();
     }
 }

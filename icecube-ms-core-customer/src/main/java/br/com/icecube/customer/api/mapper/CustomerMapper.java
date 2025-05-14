@@ -1,31 +1,25 @@
 package br.com.icecube.customer.api.mapper;
 
-import br.com.icecube.customer.api.dto.AddressDTO;
 import br.com.icecube.customer.api.dto.CustomerDTO;
-import br.com.icecube.customer.domain.model.Address;
 import br.com.icecube.customer.domain.model.Customer;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import br.com.icecube.customer.domain.model.Document;
+import br.com.icecube.customer.domain.model.EmailAddress;
+import br.com.icecube.customer.domain.model.LegalName;
 
-import java.util.List;
-
-@Mapper(componentModel = "spring")
 public interface CustomerMapper {
 
-    @Mapping(target = "legalName", expression = "java(LegalName.of(customerDTO.legalName()))")
-    @Mapping(target = "document", expression = "java(Document.of(customerDTO.document()))")
-    @Mapping(target = "address", expression = "java(mapAddressDTOs(customerDTO.address()))")
-    Customer toModel(CustomerDTO customerDTO);
 
-    default List<Address> mapAddressDTOs(List<AddressDTO> addressDTOs) {
-        return addressDTOs.stream()
-                .map(addressDTO -> Address.builder()
-                        .street(addressDTO.street())
-                        .number(addressDTO.number())
-                        .city(addressDTO.city())
-                        .zipcode(addressDTO.zipcode())
-                        .build())
-                .toList();
+    static Customer mapToCustomer(final CustomerDTO customerDTO) {
+        Document document = Document.of(customerDTO.document());
+        LegalName lastName = LegalName.of(customerDTO.legalName());
+        EmailAddress emailAddress = EmailAddress.of(customerDTO.emailAddress());
+        return Customer.create(lastName, document, emailAddress);
+    }
+
+    static CustomerDTO mapToCustomerDTO(final Customer customerCreated) {
+        return new CustomerDTO(customerCreated.getLegalName().getValue(),
+                customerCreated.getEmailAddress().getValue(),
+                customerCreated.getDocument().getValue());
     }
 
 }
