@@ -150,4 +150,3 @@ spring.cloud.stream.bindings.processCustomerCreatedFromRetryTopic-in-0.group=dec
 
 ```
 
-- ![Screenshot from 2025-04-15 16-38-38](https://github.com/user-attachments/assets/b0d58151-4d6d-4614-b7ec-29c05d9c163d)
