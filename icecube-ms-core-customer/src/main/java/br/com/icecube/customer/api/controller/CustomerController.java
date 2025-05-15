@@ -25,7 +25,7 @@ public class CustomerController {
         return new ResponseEntity<>(customerService.save(CustomerMapper.mapToCustomer(customerDTO)), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{customerId}")
+    @PatchMapping("/{customerId}")
     public ResponseEntity<Void> updateEmail(
             @PathVariable final Long customerId,
             @RequestBody EmailDTO emailDTO) {

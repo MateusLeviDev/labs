@@ -15,10 +15,9 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Sinks;
 
-import java.time.Instant;
-
 import static br.com.icecube.customer.api.contants.Constants.Kafka.*;
-import static br.com.icecube.customer.api.mapper.CustomerMapper.mapToCustomerDTO;
+import static br.com.icecube.customer.api.mapper.CustomerMapper.mapToCreateCustomerEvent;
+import static br.com.icecube.customer.api.mapper.CustomerMapper.mapToEmailChangedEvent;
 
 @Service
 @Slf4j
@@ -28,48 +27,34 @@ public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
     private final Sinks.Many<Message<?>> customerProducer;
 
-    private static CustomerEvent.CustomerCreated mapToCreateCustomerEvent(Customer customerCreated) {
-        return new CustomerEvent.CustomerCreated(
-                customerCreated.getId(), Instant.now(), mapToCustomerDTO(customerCreated));
-    }
-
-    private static CustomerEvent.EmailUpdated mapToEmailChangedEvent(Customer customer) {
-        return new CustomerEvent.EmailUpdated(
-                customer.getId(), Instant.now(), mapToCustomerDTO(customer));
-    }
 
     @Override
     @Transactional
     public Customer save(Customer customer) {
-        final Customer savedCustomer = customerRepository.save(customer);
-
-        CustomerEvent.CustomerCreated customerCreatedEvent = mapToCreateCustomerEvent(savedCustomer);
-        final var customerCreatedMessage = MessageBuilder.withPayload(customerCreatedEvent)
-                .setHeader(HEADER_NAME, CUSTOMER_CREATED)
-                .setHeader(KafkaHeaders.KEY, String.valueOf(customerCreatedEvent.customerId()).getBytes())
-                .build();
-
-        customerProducer.tryEmitNext(customerCreatedMessage);
-
+        final var savedCustomer = customerRepository.save(customer);
+        CustomerEvent.CustomerCreated eventPayload = mapToCreateCustomerEvent(savedCustomer);
+        final var outboundMessage = buildEventPayload(eventPayload, CUSTOMER_CREATED);
+        customerProducer.tryEmitNext(outboundMessage);
         log.info("Customer saved successfully document = {}", savedCustomer.getDocument().getValue());
         return savedCustomer;
     }
 
     @Override
     public void updateEmail(Long customerId, EmailAddress emailAddress) {
-        final var customer = customerRepository.getReferenceById(customerId);
-        customer.changeEmail(emailAddress);
-        customerRepository.save(customer);
+        final var savedCustomer = customerRepository.getReferenceById(customerId);
+        savedCustomer.changeEmail(emailAddress);
+        customerRepository.save(savedCustomer);
+        CustomerEvent.EmailUpdated eventPayload = mapToEmailChangedEvent(savedCustomer);
+        final var outboundMessage = buildEventPayload(eventPayload, EMAIL_UPDATED);
+        customerProducer.tryEmitNext(outboundMessage);
+        log.info("Customer Id {} email updated successfully", savedCustomer.getId());
+    }
 
-        CustomerEvent.EmailUpdated emailUpdatedMessage = mapToEmailChangedEvent(customer);
-        final var customerCreatedMessage = MessageBuilder.withPayload(emailUpdatedMessage)
-                .setHeader(HEADER_NAME, EMAIL_UPDATED)
-                .setHeader(KafkaHeaders.KEY, String.valueOf(emailUpdatedMessage.customerId()).getBytes())
+    private Message<?> buildEventPayload(CustomerEvent payload, String eventType) {
+        return MessageBuilder.withPayload(payload)
+                .setHeader(HEADER_NAME, eventType)
+                .setHeader(KafkaHeaders.KEY, String.valueOf(payload.customerId()).getBytes())
                 .build();
-        customerProducer.tryEmitNext(customerCreatedMessage);
-
-        log.info("Customer Id {} email updated successfully", customer.getId());
-
     }
 
     private Customer findById(final Long customerId) {
