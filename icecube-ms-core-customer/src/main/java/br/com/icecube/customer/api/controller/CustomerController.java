@@ -6,6 +6,7 @@ import br.com.icecube.customer.api.mapper.CustomerMapper;
 import br.com.icecube.customer.domain.model.Customer;
 import br.com.icecube.customer.domain.model.EmailAddress;
 import br.com.icecube.customer.domain.service.CustomerService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,16 +22,14 @@ public class CustomerController {
     }
 
     @PostMapping
-    public ResponseEntity<Customer> create(@RequestBody CustomerDTO customerDTO) {
-        return new ResponseEntity<>(customerService.save(CustomerMapper.mapToCustomer(customerDTO)), HttpStatus.CREATED);
+    public ResponseEntity<Customer> create(@RequestBody CustomerDTO dto) {
+        return new ResponseEntity<>(customerService.save(CustomerMapper.mapToCustomer(dto)), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{customerId}")
-    public ResponseEntity<Void> updateEmail(
-            @PathVariable final Long customerId,
-            @RequestBody EmailDTO emailDTO) {
+    public ResponseEntity<Void> updateEmail(@PathVariable final Long customerId, @RequestBody @Valid EmailDTO dto) {
 
-        customerService.updateEmail(customerId, EmailAddress.of(emailDTO.emailAddress()));
+        customerService.updateEmail(customerId, EmailAddress.of(dto.emailAddress()));
         return ResponseEntity.noContent().build();
     }
 }

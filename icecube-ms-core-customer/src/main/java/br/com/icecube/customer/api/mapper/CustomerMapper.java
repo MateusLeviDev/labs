@@ -20,8 +20,8 @@ public interface CustomerMapper {
 
     static CustomerDTO mapToCustomerDTO(final Customer customerCreated) {
         return new CustomerDTO(customerCreated.getLegalName().getValue(),
-                customerCreated.getEmailAddress().getValue(),
-                customerCreated.getDocument().getValue());
+                customerCreated.getDocument().getValue(),
+                customerCreated.getEmailAddress().getValue());
     }
 
     static CustomerEvent.CustomerCreated mapToCreateCustomerEvent(Customer customerCreated) {
