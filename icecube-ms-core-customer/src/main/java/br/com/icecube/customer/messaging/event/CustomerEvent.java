@@ -7,6 +7,8 @@ import java.time.Instant;
 
 public sealed interface CustomerEvent extends Serializable {
 
+    Long customerId();
+
     /**
      * Each event is a fact, it describes a state change that occurred to the entity (past tense!)
      *
