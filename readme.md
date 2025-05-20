@@ -1,3 +1,7 @@
+#### Projetcs
+- core-customer: Event Routing com Event-Type Header Pattern dentro de uma arquitetura Event-Driven baseada em Pub/Sub. Spring Cloud Stream com Kafka e programação reativa
+
+
 #### Start Broker
 
 `docker run -d -p 9092:9092 --name broker apache/kafka:3.8.0`
