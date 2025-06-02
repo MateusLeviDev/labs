@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.function.Consumer;
 
+import static br.com.icecube.config.MessageRoutingConfig.HEADER_EVENT_TYPE;
+
 
 @Component
 @Slf4j
@@ -24,9 +26,19 @@ public class CustomerMessageHandler {
     @Bean
     public Consumer<Message<CustomerEvent.CustomerCreated>> processCustomerCreated() {
         return customersCreated -> {
-            log.info("-----------> Consuming from Original Topic: {}", customersCreated);
+            log.info("[CustomerCreated] Handling event type: ----------> {}",
+                    customersCreated.getHeaders().get(HEADER_EVENT_TYPE));
             CustomerEvent.CustomerCreated payload = customersCreated.getPayload();
             processWithRetryHandling(payload, () -> processCustomerCreated(payload));
+        };
+    }
+
+    @Bean
+    public Consumer<Message<CustomerEvent.EmailUpdated>> processEmailUpdated() {
+        return emailUpdated -> {
+            log.info("[EmailUpdated] Handling event type: ----------> {}",
+                    emailUpdated.getHeaders().get(HEADER_EVENT_TYPE));
+            log.info("the message is: {}", emailUpdated.getPayload());
         };
     }
 
@@ -42,11 +54,11 @@ public class CustomerMessageHandler {
     private void processCustomerCreated(CustomerEvent.CustomerCreated customerCreated) {
         log.info("Processing event 'CustomerCreated': {}", customerCreated);
         CustomerDTO customer = customerCreated.customer();
-        if (customer.ssn() % 2 == 0) {
+        if (customer.document().startsWith("9")) {
             throw new TransientFailureException("retry this message");
         }
-        Decision decision = decisionMakerService.decide(customer.ssn(), customer.birthDate());
-        log.info("Processed request for customer SSN [{}]. Result: {}", customer.ssn(), decision);
+        Decision decision = decisionMakerService.decide(customer.document());
+        log.info("Processed request for customer Document [{}]. Result: {}", customer.document(), decision);
     }
 
     private void processWithRetryHandling(CustomerEvent.CustomerCreated customerCreated, Runnable process) {

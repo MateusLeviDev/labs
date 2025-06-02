@@ -7,10 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.temporal.ChronoUnit;
-
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -24,27 +20,21 @@ public class Decision {
     @Enumerated(EnumType.STRING)
     private State state;
 
-    private SSN ssn;
+    private Document document;
 
-    private Decision(State state, SSN ssn) {
+    private Decision(State state, Document document) {
         this.state = state;
-        this.ssn = ssn;
+        this.document = document;
     }
 
-    public static Decision decide(SSN ssn, String birthdate) {
-        Period creditLimitDuration = Period.ofYears(40);
-        var maximumCustomerYears = 70;
+    public static Decision decide(Document document) {
 
-        LocalDate maximumAllowedAge = LocalDate.now().plus(creditLimitDuration);
-
-        long customerYearsInTheEndOfCredit = ChronoUnit.YEARS.between(LocalDate.parse(birthdate), maximumAllowedAge);
-
-        if (customerYearsInTheEndOfCredit > maximumCustomerYears) {
-            return new Decision(State.REJECTED, ssn);
-        } else if (ssn.getSsn() % 2 == 0) {
-            return new Decision(State.APPROVED, ssn);
+        if (document.getValue().startsWith("0")) {
+            return new Decision(State.REJECTED, document);
+        } else if (document.getValue().startsWith("4")) {
+            return new Decision(State.APPROVED, document);
         }
-        return new Decision(State.PRE_APPROVED, ssn);
+        return new Decision(State.PRE_APPROVED, document);
     }
 
 }
