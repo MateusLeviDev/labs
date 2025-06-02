@@ -13,10 +13,13 @@ spring.datasource:
     password: postgres
 
 spring.cloud:
-    function.definition: processCustomerCreated;processCustomerCreatedFromRetryTopic
+    function.definition: functionRouter;processCustomerCreatedFromRetryTopic
     stream:
+        function:
+            routing:
+                enabled: true
         bindings:
-            processCustomerCreated-in-0:
+            functionRouter-in-0:
                 destination: customer-created-topic
                 group: decision-microservice
                 consumer:
@@ -35,11 +38,11 @@ spring.cloud:
                     back-off-multiplier: 2.0
         kafka:
             bindings:
-                processCustomerCreated-in-0:
-                    consumer:
-                        enable-dlq: true
-                        dlq-name: decision.customer-retry-topic
-                processCustomerCreatedFromRetryTopic-in-0:
+                functionRouter-in-0:
                     consumer:
                         enable-dlq: true
                         dlq-name: decision.customer-DLQ
+                processCustomerCreatedFromRetryTopic-in-0:
+                  consumer:
+                    enable-dlq: true
+                    dlq-name: decision.customer-DLQ
