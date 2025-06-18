@@ -66,7 +66,7 @@ public class CustomerMessageHandler {
             process.run();
             log.info("Successfully processed event: {}", customerCreated);
         } catch (TransientFailureException e) {
-            log.error("Retryable error occurred, might retry: {}", e.getMessage());
+            log.error("Retryable error occurred, might retry: {}", e.getReason());
             throw e;
         }
     }
