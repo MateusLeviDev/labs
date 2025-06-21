@@ -1,15 +1,12 @@
-package br.com.icecube.service.impl;
+package br.com.icecube.domain.service.impl;
 
-import br.com.icecube.domain.Document;
-import br.com.icecube.domain.SSN;
-import br.com.icecube.repository.DecisionRepository;
-import br.com.icecube.service.DecisionMakerService;
-import br.com.icecube.domain.Decision;
+import br.com.icecube.domain.model.Document;
+import br.com.icecube.domain.repository.DecisionRepository;
+import br.com.icecube.domain.service.DecisionMakerService;
+import br.com.icecube.domain.model.Decision;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
 
 @Slf4j
 @Service

@@ -1,4 +1,4 @@
-package br.com.icecube.enumerated;
+package br.com.icecube.domain.enums;
 
 public enum State {
     APPROVED,

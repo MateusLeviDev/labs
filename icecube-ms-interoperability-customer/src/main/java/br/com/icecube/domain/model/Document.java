@@ -1,4 +1,4 @@
-package br.com.icecube.domain;
+package br.com.icecube.domain.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

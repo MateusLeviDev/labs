@@ -1,4 +1,4 @@
-package br.com.icecube.messaging.event;
+package br.com.icecube.infrastructure.messaging.event;
 
 
 import java.io.Serializable;

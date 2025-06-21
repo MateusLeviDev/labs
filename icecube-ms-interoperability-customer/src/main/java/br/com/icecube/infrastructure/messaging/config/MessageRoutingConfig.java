@@ -1,4 +1,4 @@
-package br.com.icecube.config;
+package br.com.icecube.infrastructure.messaging.config;
 
 
 import lombok.extern.slf4j.Slf4j;

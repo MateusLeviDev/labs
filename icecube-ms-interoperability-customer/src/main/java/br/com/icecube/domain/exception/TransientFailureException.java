@@ -1,4 +1,4 @@
-package br.com.icecube.exception;
+package br.com.icecube.domain.exception;
 
 import lombok.Value;
 

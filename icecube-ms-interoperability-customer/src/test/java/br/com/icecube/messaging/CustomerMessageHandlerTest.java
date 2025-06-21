@@ -1,9 +1,9 @@
 package br.com.icecube.messaging;
 
 import br.com.icecube.common.AbstractContainerProvider;
-import br.com.icecube.messaging.event.CustomerDTO;
-import br.com.icecube.messaging.event.CustomerEvent;
-import br.com.icecube.repository.DecisionRepository;
+import br.com.icecube.infrastructure.messaging.event.CustomerDTO;
+import br.com.icecube.infrastructure.messaging.event.CustomerEvent;
+import br.com.icecube.domain.repository.DecisionRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -23,7 +23,7 @@ import java.time.Duration;
 import java.time.Instant;
 
 import static br.com.icecube.common.constants.TestConstants.*;
-import static br.com.icecube.config.MessageRoutingConfig.HEADER_EVENT_TYPE;
+import static br.com.icecube.infrastructure.messaging.config.MessageRoutingConfig.HEADER_EVENT_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers

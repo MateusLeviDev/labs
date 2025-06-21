@@ -1,6 +1,6 @@
-package br.com.icecube.domain;
+package br.com.icecube.domain.model;
 
-import br.com.icecube.enumerated.State;
+import br.com.icecube.domain.enums.State;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

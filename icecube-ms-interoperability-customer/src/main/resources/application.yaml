@@ -1,7 +1,5 @@
 spring.devtools.restart.enabled: false
 
-server.port: 8082
-
 spring.jpa.show-sql: true
 spring.jpa.hibernate.ddl-auto: create
 spring.jpa.properties.hibernate.format_sql: true
@@ -32,7 +30,7 @@ spring.cloud:
                     concurrency: 3
                     max-attempts: 3
                     retryable-exceptions:
-                        br.com.icecube.exception.TransientFailureException: true
+                        br.com.icecube.domain.exception.TransientFailureException: true
                     back-off-initial-interval: 1000
                     back-off-max-interval: 10000
                     back-off-multiplier: 2.0

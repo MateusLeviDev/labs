@@ -1,10 +1,11 @@
-package br.com.icecube.messaging;
+package br.com.icecube.infrastructure.messaging.handler;
 
-import br.com.icecube.domain.Decision;
-import br.com.icecube.exception.TransientFailureException;
-import br.com.icecube.messaging.event.CustomerDTO;
-import br.com.icecube.messaging.event.CustomerEvent;
-import br.com.icecube.service.DecisionMakerService;
+import br.com.icecube.domain.model.Decision;
+import br.com.icecube.domain.exception.TransientFailureException;
+import br.com.icecube.infrastructure.messaging.event.CustomerDTO;
+import br.com.icecube.infrastructure.messaging.event.CustomerEvent;
+import br.com.icecube.infrastructure.messaging.config.MessageRoutingConfig;
+import br.com.icecube.domain.service.DecisionMakerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -12,8 +13,6 @@ import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Consumer;
-
-import static br.com.icecube.config.MessageRoutingConfig.HEADER_EVENT_TYPE;
 
 
 @Component
@@ -27,7 +26,7 @@ public class CustomerMessageHandler {
     public Consumer<Message<CustomerEvent.CustomerCreated>> processCustomerCreated() {
         return customersCreated -> {
             log.info("[CustomerCreated] Handling event type: ----------> {}",
-                    customersCreated.getHeaders().get(HEADER_EVENT_TYPE));
+                    customersCreated.getHeaders().get(MessageRoutingConfig.HEADER_EVENT_TYPE));
             CustomerEvent.CustomerCreated payload = customersCreated.getPayload();
             processWithRetryHandling(payload, () -> processCustomerCreated(payload));
         };
@@ -37,7 +36,7 @@ public class CustomerMessageHandler {
     public Consumer<Message<CustomerEvent.EmailUpdated>> processEmailUpdated() {
         return emailUpdated -> {
             log.info("[EmailUpdated] Handling event type: ----------> {}",
-                    emailUpdated.getHeaders().get(HEADER_EVENT_TYPE));
+                    emailUpdated.getHeaders().get(MessageRoutingConfig.HEADER_EVENT_TYPE));
             log.info("the message is: {}", emailUpdated.getPayload());
         };
     }
