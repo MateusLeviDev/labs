@@ -1,7 +1,7 @@
-package br.com.icecube.mapper;
+package br.com.icecube.domain.mapper;
 
-import br.com.icecube.domain.SalesInfo;
-import br.com.icecube.dto.SalesDTO;
+import br.com.icecube.domain.model.SalesInfo;
+import br.com.icecube.domain.dto.SalesDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 

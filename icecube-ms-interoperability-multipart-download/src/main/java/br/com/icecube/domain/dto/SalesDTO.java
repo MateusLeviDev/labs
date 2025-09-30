@@ -1,4 +1,4 @@
-package br.com.icecube.dto;
+package br.com.icecube.domain.dto;
 
 public record SalesDTO(Long saleId,
                        Long productId,
